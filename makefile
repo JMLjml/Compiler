@@ -2,7 +2,7 @@ compile: scanner.o
 	g++ -Wall scanner.o -o compile 
 	rm *.o
 
-scanner.o: scanner.c
+scanner.o: scanner.c tokens.h
 	g++ -c -Wall -lfl scanner.c
 
 scanner.c: scanner.l
