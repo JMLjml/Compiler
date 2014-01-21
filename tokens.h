@@ -1,0 +1,1 @@
+enum Tokens {RELOP = 256, ADDOP = 257, IDENT = 258};
