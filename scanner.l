@@ -10,7 +10,7 @@
 ws		[ \t\r]+
 line	[\n]
 punc	[,:;\(\)]
-relop	(<=|<|>=|>|!=|=)
+relop	(<=|<|>=|>|\/=|=)
 comment (--)[ a-zA-Z0-9]+
 ident	[A-Za-z](?:[a-zA-Z0-9]+)*
 addop	[-+]
