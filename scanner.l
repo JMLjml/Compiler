@@ -2,12 +2,9 @@
 %{
 
 #include "tokens.h"
-
+#include "listing.h"
 
 %}
-
-
-
 
 
 ws		[ \t\r]+
@@ -21,9 +18,6 @@ mulop	[*/]
 real	[0-9]+\.[0-9]+
 int		[0-9]+
 bool	(true|false)
-
-
-
  
 
 
@@ -46,7 +40,7 @@ and			{ECHO; return AND;}
 or			{ECHO; return OR;}
 not			{ECHO; return NOT;}
 
-{line}		{ECHO; printf("%4d ", yylineno);}
+{line}		{ECHO; Listing::GetInstance()->nextLine();}
 {ws}		{ECHO;}
 {comment}	{ECHO;}
 {punc}		{ECHO; return yytext[0];}
@@ -59,7 +53,7 @@ not			{ECHO; return NOT;}
 {ident}		{ECHO; return IDENT;}
 
 
-.			{ECHO; printf("LEXICAL ERROR on line: %d.\n", yylineno); return yytext[0];}
+.			{ECHO; Listing::GetInstance()->appendError(Listing::GetInstance()->LEXICAL, yytext);}
 
 %%
 
@@ -69,8 +63,6 @@ not			{ECHO; return NOT;}
 
 int main(int argc, char **argv)
 {	
-	
-
 
 	FILE *fout = fopen("output.txt", "w");
 	if(!fout) {
@@ -78,10 +70,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	//yyout = fout;
-
-
-
+	
 	if(argc < 2) { //just read from the stdin
 
 		printf("Reading from the stdin.\n");
@@ -99,35 +88,22 @@ int main(int argc, char **argv)
 		}
 
 		yylineno = 1;
-		int line = 1;
-
 
 		int tok;
 
 		yyrestart(f);
 
-		printf("%4d ", line);
+		printf("%4d ", yylineno);
 
 		while((tok = yylex())) {
-			
-			/*
-
-
-			if(line != yylineno) {
-				printf("%4d ", yylineno);
-				line = yylineno;
-			}
-
-			printf("The token and lexeme pair is: %d %s\n", tok, yytext);
-			*/
-
-			
+			//write the token and lexem pairs to the output file			
 			fprintf(fout, "%d %s\n", tok, yytext);
-
 		}
 		
-		
+		//close the output file
 		fclose(f);
+
+		Listing::GetInstance()->printSummary();
 		
 	}
 	return 0;	
