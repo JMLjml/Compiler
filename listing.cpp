@@ -1,3 +1,19 @@
+/*  Course: 1402CMSC4306380
+	Project 1
+	Author John M. Lasheski
+	Date: Jan 25, 2014
+	Platform: Flex, Cygwin64, Sublime Text 2
+
+
+	listing.cpp  is part of a compiler project that compiles a simple functional language.
+	
+	lisiting.cpp is the source file for the Singleton Listing class. 
+	The Listing class is used by the scanner to print line numbers, count and display errors as they
+	are encountered, and to summarize compilation status. It is a singleton object so the default
+	contructor is private and can only be called by the GetInstance method. The Listing class is not
+	thread safe.
+*/
+
 #include <stddef.h>
 #include <stdio.h>
 #include <string>
@@ -10,15 +26,17 @@ denote that the singleton object has not yet been created*/
 Listing* Listing::Instance = NULL;
 
 
-Listing::Listing() {
+Listing::Listing()
+{
 	lexCount = 0;
 	synCount = 0;
 	semCount = 0;
-	lineCount = 1;
+	lineCount = 1;//if we get here, there is at least one line of code
 	errorMessage.clear();
 }
 
-Listing::~Listing() {
+Listing::~Listing()
+{
 	Instance = NULL;
 	lexCount = 0;
 	synCount = 0;
@@ -27,7 +45,9 @@ Listing::~Listing() {
 	errorMessage.clear();
 }
 
-Listing* Listing::GetInstance() {
+//returns the current instance of Listing class if it exists, or a new instance if not
+Listing* Listing::GetInstance()
+{
 	if(!Instance) {
 		Instance = new Listing();
 	}
@@ -35,8 +55,9 @@ Listing* Listing::GetInstance() {
 }
 
 
-void Listing::nextLine() {
-	
+//print any error messages and the next line number
+void Listing::nextLine()
+{
 	if(!errorMessage.empty()) {
 		printf("%s", errorMessage.c_str());
 		errorMessage.clear();
@@ -46,7 +67,10 @@ void Listing::nextLine() {
 	printf("%4d  ", lineCount);
 }
 
-void Listing::appendError(Listing::ErrorType error, char* message) {
+
+//append the correct error message onto the errormessage string for later priting
+void Listing::appendError(Listing::ErrorType error, char* message)
+{
 	switch (error)
 	{
 	case Listing::LEXICAL:
@@ -75,8 +99,23 @@ void Listing::appendError(Listing::ErrorType error, char* message) {
 	}
 }
 
-void Listing::printSummary() {
+//Prints the total number of errors encountered
+void Listing::printSummary()
+{
+	//print the last set of error messages before printing the summary
+	if(!errorMessage.empty()) {
+		printf("\n%s", errorMessage.c_str());
+		errorMessage.clear();
+	}
+	
+	//print the correct summary messages
+	if(Listing::lexCount == 0 && Listing::synCount == 0 && Listing::semCount == 0)
+	{
+		printf("\n\n Compiled Sucessfully\n");
+	} else
+	{	
 	printf("\n\nLexical Errors %d\n",Listing::lexCount);
 	printf("Syntax Errors %d\n",Listing::synCount);
 	printf("Semantic Errors %d\n",Listing::semCount);
+	}	
 }
