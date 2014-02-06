@@ -1,7 +1,7 @@
 /*  Course: 1402CMSC4306380
-	Project 1
+	Project 2
 	Author John M. Lasheski
-	Date: Jan 25, 2014
+	Date: Feb 5, 2014
 	Platform: Flex, Cygwin64, Sublime Text 2
 
 
@@ -15,7 +15,7 @@
 
 
 
-//this line should not be in the project 1 version...	
+
 
 %option noyywrap yylineno
 
@@ -72,6 +72,7 @@ not			{ECHO; return NOT;}
 
 %%
 
+/*
 int main(int argc, char **argv)
 {	
 
@@ -146,3 +147,4 @@ int main(int argc, char **argv)
 	}
 	return 0;	
 }
+*/

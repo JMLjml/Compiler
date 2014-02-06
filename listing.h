@@ -1,7 +1,7 @@
 /*  Course: 1402CMSC4306380
-	Project 1
+	Project 2
 	Author John M. Lasheski
-	Date: Jan 25, 2014
+	Date: Feb 5, 2014
 	Platform: Flex, Cygwin64, Sublime Text 2
 
 
