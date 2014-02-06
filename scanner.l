@@ -13,6 +13,10 @@
 	Usage from command line $ ./compile data.txt
 */
 
+
+
+//this line should not be in the project 1 version...	
+
 %option noyywrap yylineno
 
 %{
