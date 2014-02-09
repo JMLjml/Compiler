@@ -34,6 +34,6 @@ private:
 	static Listing* GetInstance();
 	enum ErrorType {LEXICAL, SYNTAX, SEMANTIC};
 	void nextLine();
-	void appendError(ErrorType error, char* message);
+	void appendError(ErrorType error, const char* message);
 	void printSummary();	
 };

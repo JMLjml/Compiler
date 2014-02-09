@@ -64,12 +64,12 @@ void Listing::nextLine()
 	}
 
 	lineCount++;
-	printf("%4d  ", lineCount);
+	printf("%4d ", lineCount);
 }
 
 
 //append the correct error message onto the errormessage string for later priting
-void Listing::appendError(Listing::ErrorType error, char* message)
+void Listing::appendError(Listing::ErrorType error, const char* message)
 {
 	switch (error)
 	{
@@ -80,7 +80,6 @@ void Listing::appendError(Listing::ErrorType error, char* message)
 		lexCount++;
 		break;
 	case Listing::SYNTAX:
-		Listing::errorMessage.append("Syntax Error, ");
 		Listing::errorMessage.append(message);
 		Listing::errorMessage.append("\n");
 		synCount++;
@@ -111,11 +110,11 @@ void Listing::printSummary()
 	//print the correct summary messages
 	if(Listing::lexCount == 0 && Listing::synCount == 0 && Listing::semCount == 0)
 	{
-		printf("\n\n Compiled Sucessfully\n");
+		printf("\n\n Compiled Sucessfully\n\n");
 	} else
 	{	
 	printf("\n\nLexical Errors %d\n",Listing::lexCount);
 	printf("Syntax Errors %d\n",Listing::synCount);
-	printf("Semantic Errors %d\n",Listing::semCount);
+	printf("Semantic Errors %d\n\n",Listing::semCount);
 	}	
 }
