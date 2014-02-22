@@ -8,11 +8,7 @@
 	scanner.l is part of a compiler project that compiles a simple functional language.
 	
 	scanner.l is called by parser.y and reads from the supplied input file to return tokens.
-
-	Usage from command line $ ./compile data.txt
 */
-
-
 
 
 

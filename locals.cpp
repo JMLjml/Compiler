@@ -1,3 +1,14 @@
+/*  Course: 1402CMSC4306380
+	Project 3
+	Author John M. Lasheski
+	Date: Feb 21, 2014
+	Platform: Flex, Cygwin64, Sublime Text 2
+	
+	locals.cpp is part of a compiler project that compiles a simple functional language.
+
+	locals.cpp supplies the symbol table for identifier tokens found by parser.y
+*/
+
 #include <string>
 #include <map>
 
