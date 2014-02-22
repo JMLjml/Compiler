@@ -6,18 +6,18 @@
 
 #	makefile for Project 1. Uses flex and g++ compilers.
 
-compile: scanner.o parser.o listing.o
-	g++ -Wall scanner.o parser.o listing.o -o compile 
+compile: scanner.o parser.o listing.o locals.o
+	g++ -Wall scanner.o parser.o listing.o locals.o -o compile 
 	rm *.o
 
-scanner.o: scanner.c listing.h tokens.h
+scanner.o: scanner.c listing.h tokens.h locals.h
 	g++ -c -Wall -lfl scanner.c
 
 scanner.c: scanner.l
 	flex scanner.l
 	mv lex.yy.c scanner.c
 
-parser.o: parser.c listing.h
+parser.o: parser.c locals.h listing.h 
 	g++ -c -Wall parser.c
 
 parser.c tokens.h: parser.y
@@ -28,5 +28,8 @@ parser.c tokens.h: parser.y
 listing.o: listing.cpp listing.h
 	g++ -c -Wall listing.cpp
 
+locals.o: locals.cpp locals.h
+	g++ -c -Wall locals.cpp
+
 clean:
-	rm scanner.c parser.c compile.exe parser.output
+	rm scanner.c parser.c compile.exe parser.output *.gch

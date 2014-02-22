@@ -17,8 +17,12 @@
 */
 
 %{
+
+#define YYDEBUG 1
+
 #include <stdio.h>
 #include "listing.h"
+#include "locals.h"
 
 extern int yylex(void);
 extern FILE *yyin;
@@ -26,53 +30,94 @@ extern int yylineno;
 extern char *yytext;
 
 
+
+//functions for checking indiv sematics
+Types Type_Check_Assignment(Types left, Types right);
+Types Type_Check_Relop(Types left, Types right);
+Types Type_Check_Logic(Types left, Types right);
+Types Type_Check_Arithmetic(Types left, Types right);
+Types Type_Check_Not(Types type);
+
+Types checkTypes(Types left, Types right);
+
+
+
+
+
+
+
+
+
 void yyerror(const char *s)
 {
 	Listing::GetInstance()->appendError(Listing::GetInstance()->SYNTAX, s);
 }
 
+//Symbol Table for the parser
+Locals* locals = new Locals();
 
 %}
 
 %error-verbose
 
 
+%union
+{
+	char* ident;
+	Types types;
+}
+
+
 //Declare Tokens
 %token RELOP
 %token ADDOP
 %token MULOP
-%token IDENT
 %token BEGIN_
-%token BOOLEAN
 %token ELSE
 %token END
 %token ENDIF
 %token FUNCTION
 %token IF
 %token IS
-%token INT
-%token REAL
 %token RETURNS
 %token THEN
 %token AND
 %token OR
 %token NOT
-%token BOOL_LIT
-%token INT_LIT
-%token REAL_LIT
+%token <ident> IDENT
+%token <types> INT
+%token <types> REAL
+%token <types> BOOLEAN
+%token <types> LITERAL
 //INT, REAL, and BOOLEAN are for the reserved keywords
-//INT_LIT, REAL_LIT, and BOOL_LIT are for the data literals of each type
 
+
+
+
+
+
+
+
+%type <types> type
+//%type <types> body
+%type <types> variable
+%type <types> statement
+%type <types> expression
+%type <types> and
+%type <types> relation
+%type <types> sum
+%type <types> term
+%type <types> not
+%type <types> factor
 
 
 
 %%
 program:
-	functionList;
+	function;
 	
-functionList:
-	functionList function_recovery body
-	| function_recovery body;
+function:
+	function_recovery body;
 
 function_recovery:   
     function ';' |
@@ -90,7 +135,9 @@ parameter:
 	IDENT ':' type;
 
 type:
-	INT | REAL | BOOLEAN;
+	INT {$$ = INT_TYPE;}
+	| REAL {$$ = REAL_TYPE;}
+	| BOOLEAN {$$ = BOOL_TYPE;};
 
 body:
 	variable BEGIN_ statement END ';'
@@ -98,55 +145,198 @@ body:
 	| error ';';
 
 variable:
-	variable IDENT ':' type IS statement
-	| IDENT ':' type IS statement;
+	variable IDENT ':' type IS statement {locals->insert($2,Type_Check_Assignment($4,$6));};
+	| IDENT ':' type IS statement {locals->insert($1,Type_Check_Assignment($3,$5));};
 
 statement:
-	expression ';'
+	expression ';' {$$ = $1;}
 	| IF expression THEN statement ELSE statement ENDIF ';';
 	| error ';';
 
 expression:
-	expression OR and
+	expression OR and {$$ = Type_Check_Logic($1, $3);}
 	| and;
 
+
 and:
-	and AND relation
+	and AND relation {$$ = Type_Check_Logic($1, $3);}
 	| relation;
 
+
+
 relation:
-	relation RELOP sum
+	relation RELOP sum {$$ = Type_Check_Relop($1, $3);}
 	| sum;
 
 sum:
-	sum ADDOP term
+	sum ADDOP term {$$ = Type_Check_Arithmetic($1, $3);}
 	| term;
 
 
 term:
-	term MULOP not
+	term MULOP not //{$$ = Type_Check_Arithmetic($1, $3);} -- this one might not be needed
 	| not;
 
 not:
-	NOT factor
+	NOT factor {$$ = Type_Check_Not($2);}
 	| factor;
 
 
 factor:
-	INT_LIT
-	| REAL_LIT
-	| BOOL_LIT
-	| IDENT
-	| IDENT '(' expression ')'
-	| IDENT '(' expression ',' opt_exp ')'
-	| '(' expression ')';
+	LITERAL {$$ = $1;}
+	| IDENT {$$ = locals->lookUp($1);}
+	| '(' expression ')'{ $$ = $2;};
 
-opt_exp:
-	opt_exp ',' expression
-	| expression;
-	
 %%
 
+
+
+
+Types Type_Check_Relop(Types left, Types right)
+{
+	if(left == BOOL_TYPE || right == BOOL_TYPE)
+	{
+		Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Attempting to use Bool_Type with relational opperation.");
+
+		return UNKNOWN;		
+	}
+
+
+	if(left == right)
+	{
+		return left;
+	}
+
+
+	Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Attempting to use coercion during relational opperation.");
+
+	return UNKNOWN;
+
+
+}
+
+
+Types Type_Check_Assignment(Types left, Types right)
+{
+	if(left == right)
+	{
+		return left;
+	}
+
+	Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Attempting assigment with two different types.");
+
+	return UNKNOWN;
+}
+
+Types Type_Check_Logic(Types left, Types right)
+{
+	if(left == BOOL_TYPE && right == BOOL_TYPE)
+	{
+		return left;
+	}
+
+	Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Attempting to use Literal with logic opperation.");
+
+	return UNKNOWN;
+}
+
+
+
+
+Types Type_Check_Arithmetic(Types left, Types right)
+{
+	
+	if(left == BOOL_TYPE || right == BOOL_TYPE)
+	{
+		Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Attempting to use Bool_Type with arithmetic opperation.");
+
+		return UNKNOWN;		
+	}
+
+	if(left == right)
+	{
+		return left;
+	}
+
+
+	Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Attempting to use coercion during arithmetic opperation.");
+
+	return UNKNOWN;
+
+}
+
+
+/*Checks to make sure a boolean operator is being used with the not statement*/
+Types Type_Check_Not(Types type)
+{
+	if(type != BOOL_TYPE)
+	{
+		Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Attempting to use unexpected type with 'not' opperation. Type should be boolean.");
+
+		return UNKNOWN;
+	}
+
+	return type;
+}
+
+
+
+
+
+Types checkTypes(Types left, Types right)
+{
+	if(left == right)
+	{
+		return left;
+	}
+
+	switch(left)
+	{
+	
+	//The types dont match as they should, print an error message
+	case INT_TYPE:
+		if(right == REAL_TYPE)
+		{
+			Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Expected Int, received Real.");
+		} else {
+			Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Expected Int, received Boolean");
+		}
+		break;
+	
+	case REAL_TYPE:
+		if(right == INT_TYPE)
+		{
+			Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Expected Real, received Int.");
+		} else {
+			Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Expected Real, received Boolean");
+		}
+		break;
+
+	case BOOL_TYPE:
+		if(right == INT_TYPE)
+		{
+			Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Expected Boolean, received Int.");
+		} else {
+			Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
+		"Type Mismatch. Expected Boolean, received Real");
+		}
+		break;
+	}	
+
+	return UNKNOWN;
+}
 
 
 
@@ -198,6 +388,9 @@ int main(int argc, char **argv)
 
 		//destroy the Listing so we start with a clean slate for the next file
 		Listing::GetInstance()->~Listing();
+
+		//Clear out the symbol table so we start with a clean slate for the next file
+		locals->clear();
 	}	
 
 	return 0;

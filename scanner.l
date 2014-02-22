@@ -7,7 +7,7 @@
 
 	scanner.l is part of a compiler project that compiles a simple functional language.
 	
-	scanner.l is called by parser.y and reads from the supplied input file to return tokems.
+	scanner.l is called by parser.y and reads from the supplied input file to return tokens.
 
 	Usage from command line $ ./compile data.txt
 */
@@ -19,8 +19,9 @@
 %option noyywrap yylineno
 
 %{
-#include "tokens.h"
 #include "listing.h"
+#include "locals.h"
+#include "tokens.h"
 %}
 
 
@@ -59,12 +60,13 @@ not			{ECHO; return NOT;}
 {comment}	{ECHO;}
 {punc}		{ECHO; return yytext[0];}
 {relop}		{ECHO; return RELOP;}
-{bool}		{ECHO; return BOOL_LIT;}
+{bool}		{ECHO; yylval.types = BOOL_TYPE; return LITERAL;}
 {addop}		{ECHO; return ADDOP;}
 {mulop}		{ECHO; return MULOP;}
-{real}		{ECHO; return REAL_LIT;}
-{int}		{ECHO; return INT_LIT;}
-{ident}		{ECHO; return IDENT;}
+{real}		{ECHO; yylval.types = REAL_TYPE; return LITERAL;}
+{int}		{ECHO; yylval.types = INT_TYPE; return LITERAL;}
+{ident}		{ECHO; yylval.ident = (char*)malloc(yyleng + 1);
+			strcpy(yylval.ident, yytext); return IDENT;}
 
 
 .			{ECHO; Listing::GetInstance()->appendError(Listing::GetInstance()->LEXICAL, yytext);}
