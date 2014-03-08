@@ -34,7 +34,7 @@ void Locals::insert(char* identifier, Operand op)
 }
 
 
-Operand* Locals::lookUp(char* identifier)
+Operand Locals::lookUp(char* identifier)
 {
 	string name(identifier);
 	map<string, Operand>::iterator iterator;
@@ -46,10 +46,10 @@ Operand* Locals::lookUp(char* identifier)
 		Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC,
 		 "Attempting to access an undeclared identifier");
 
-		return new Operand();
+		return Operand();
 	}
 
-	return &iterator->second;
+	return iterator->second;
 }
 
 /* Called by the parser after completing a file so that the 

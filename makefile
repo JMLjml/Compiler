@@ -10,14 +10,14 @@ compile: scanner.o parser.o listing.o locals.o operand.o
 	g++ -Wall scanner.o parser.o listing.o locals.o operand.o -o compile 
 	rm *.o
 
-scanner.o: scanner.c listing.h tokens.h locals.h
+scanner.o: scanner.c listing.h tokens.h locals.h expression.h
 	g++ -c -Wall -lfl scanner.c
 
 scanner.c: scanner.l
 	flex scanner.l
 	mv lex.yy.c scanner.c
 
-parser.o: parser.c locals.h listing.h
+parser.o: parser.c locals.h listing.h expression.h
 	g++ -c -Wall parser.c
 
 parser.c tokens.h: parser.y

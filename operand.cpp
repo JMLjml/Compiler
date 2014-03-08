@@ -70,33 +70,32 @@ Types Operand::getType()
 	return type;
 }
 
-
+bool Operand::getBoolValue()
+{
+	return value.boolValue;
+}
 
 
 void Operand::print()
 {
-	
-
 	switch(type)
 	{
-
 		case INT_TYPE:
-			printf("The type is INT and the value is %d\n", value.intValue);
+			printf(" The result is of type Integer and the value is %d.\n", value.intValue);
 			break;
 
 		case REAL_TYPE:
-			printf("The type is REAL and the value is %f\n", value.realValue);
+			printf(" The result is of type Real and the value is %f.\n", value.realValue);
 			break;
 
 		case BOOL_TYPE:
-			printf("The type is bool and the value is");
+			printf(" The result is of type Boolean and the value is");
 			printf("%s", value.boolValue ? " true.\n" : " false.\n");
 			break;
 
 		default:
 			break;
 	}
-	
 }
 
 
@@ -108,7 +107,7 @@ void Operand::print()
 *****************************************************************************************/
 
 
-Operand operator+(Operand& left, Operand& right)
+Operand operator+(Operand left, Operand right)
 {
 	Operand result;
 
@@ -137,7 +136,7 @@ Operand operator+(Operand& left, Operand& right)
 
 
 
-Operand operator-(Operand& left, Operand& right)
+Operand operator-(Operand left, Operand right)
 {
 	Operand result;
 
@@ -165,7 +164,7 @@ Operand operator-(Operand& left, Operand& right)
 }
 
 
-Operand operator*(Operand& left, Operand& right)
+Operand operator*(Operand left, Operand right)
 {
 	Operand result;
 
@@ -192,7 +191,9 @@ Operand operator*(Operand& left, Operand& right)
 	return result;
 }
 
-Operand operator/(Operand& left, Operand& right)
+
+
+Operand operator/(Operand left, Operand right)
 {
 	Operand result;
 
@@ -233,146 +234,225 @@ Operand operator/(Operand& left, Operand& right)
 
 
 
-bool operator<(Operand& left, Operand& right)
+Operand operator<(Operand left, Operand right)
 {
 	Types type = Operand::Type_Check_Relop(left,right);
 
 	//The supplied arguments are not of the right type
 	if(type != BOOL_TYPE)
 	{
-		return false;
+		return Operand();
 	}	
+
+	Operand result = Operand();
+	result.type = BOOL_TYPE;
 	
 	if(left.type == INT_TYPE)
-	{
-		return left.value.intValue < right.value.intValue ? true : false;
+	{		
+		result.value.boolValue = left.value.intValue < right.value.intValue ? true : false;
 	}
 	else
 	{
-		return left.value.realValue < right.value.realValue ? true : false;
+		result.value.boolValue = left.value.realValue < right.value.realValue ? true : false;
 	}
+
+	return result;
 }
 
 
 
-bool operator<=(Operand& left, Operand& right)
+Operand operator<=(Operand left, Operand right)
 {
 	Types type = Operand::Type_Check_Relop(left,right);
 
 	//The supplied arguments are not of the right type
 	if(type != BOOL_TYPE)
 	{
-		return false;
+		return Operand();
 	}	
+
+	Operand result = Operand();
+	result.type = BOOL_TYPE;
 	
 	if(left.type == INT_TYPE)
-	{
-		return left.value.intValue <= right.value.intValue ? true : false;
+	{		
+		result.value.boolValue = left.value.intValue <= right.value.intValue ? true : false;
 	}
 	else
 	{
-		return left.value.realValue <= right.value.realValue ? true : false;
+		result.value.boolValue = left.value.realValue <= right.value.realValue ? true : false;
 	}
+
+	return result;
 }
 
 
 
-bool operator>(Operand& left, Operand& right)
+Operand operator>(Operand left, Operand right)
 {
 	Types type = Operand::Type_Check_Relop(left,right);
 
 	//The supplied arguments are not of the right type
 	if(type != BOOL_TYPE)
 	{
-		return false;
+		return Operand();
 	}	
+
+	Operand result = Operand();
+	result.type = BOOL_TYPE;
 	
 	if(left.type == INT_TYPE)
-	{
-		return left.value.intValue > right.value.intValue ? true : false;
+	{		
+		result.value.boolValue = left.value.intValue > right.value.intValue ? true : false;
 	}
 	else
 	{
-		return left.value.realValue > right.value.realValue ? true : false;
+		result.value.boolValue = left.value.realValue > right.value.realValue ? true : false;
 	}
+
+	return result;
 }
 
 
-bool operator>=(Operand& left, Operand& right)
+Operand operator>=(Operand left, Operand right)
 {
 	Types type = Operand::Type_Check_Relop(left,right);
 
 	//The supplied arguments are not of the right type
 	if(type != BOOL_TYPE)
 	{
-		return false;
+		return Operand();
 	}	
+
+	Operand result = Operand();
+	result.type = BOOL_TYPE;
 	
 	if(left.type == INT_TYPE)
-	{
-		return left.value.intValue >= right.value.intValue ? true : false;
+	{		
+		result.value.boolValue = left.value.intValue >= right.value.intValue ? true : false;
 	}
 	else
 	{
-		return left.value.realValue >= right.value.realValue ? true : false;
+		result.value.boolValue = left.value.realValue >= right.value.realValue ? true : false;
 	}
+
+	return result;
 }
 
 
 
-bool operator==(Operand& left, Operand& right)
+Operand operator==(Operand left, Operand right)
 {
 	Types type = Operand::Type_Check_Relop(left,right);
 
 	//The supplied arguments are not of the right type
 	if(type != BOOL_TYPE)
 	{
-		return false;
+		return Operand();
 	}	
+
+	Operand result = Operand();
+	result.type = BOOL_TYPE;
 	
 	if(left.type == INT_TYPE)
-	{
-		return left.value.intValue == right.value.intValue ? true : false;
+	{		
+		result.value.boolValue = left.value.intValue == right.value.intValue ? true : false;
 	}
 	else
 	{
-		return left.value.realValue == right.value.realValue ? true : false;
+		result.value.boolValue = left.value.realValue == right.value.realValue ? true : false;
 	}
+
+	return result;
 }
 
 
 
-bool operator!=(Operand& left, Operand& right)
+Operand operator!=(Operand left, Operand right)
 {
 	Types type = Operand::Type_Check_Relop(left,right);
 
 	//The supplied arguments are not of the right type
 	if(type != BOOL_TYPE)
 	{
-		return false;
+		return Operand();
 	}	
+
+	Operand result = Operand();
+	result.type = BOOL_TYPE;
 	
 	if(left.type == INT_TYPE)
-	{
-		return left.value.intValue != right.value.intValue ? true : false;
+	{		
+		result.value.boolValue = left.value.intValue != right.value.intValue ? true : false;
 	}
 	else
 	{
-		return left.value.realValue != right.value.realValue ? true : false;
+		result.value.boolValue = left.value.realValue != right.value.realValue ? true : false;
 	}
+
+	return result;
 }
 
 
 
-bool operator!(Operand& left)
+Operand operator!(Operand left)
 {
 	if(left.type != BOOL_TYPE)
 	{
-		return false;
+		return Operand();
 	}
 
-	else return !left.value.boolValue;
+	else
+	{
+		Operand result = Operand();
+		result.type = BOOL_TYPE;
+		result.value.boolValue = !left.value.boolValue;
+		return result;
+	}
 }
+
+
+
+
+Operand operator&&(Operand left, Operand right)
+{
+	Types type = Operand::Type_Check_Logic(left,right);
+
+	//The supplied arguments are not of the right type
+	if(type != BOOL_TYPE)
+	{
+		return Operand();
+	}	
+
+	Operand result = Operand();
+	result.type = BOOL_TYPE;
+	
+	result.value.boolValue = left.value.boolValue && right.value.boolValue;
+
+	return result;
+}
+
+
+Operand operator||(Operand left, Operand right)
+{
+	Types type = Operand::Type_Check_Logic(left,right);
+
+	//The supplied arguments are not of the right type
+	if(type != BOOL_TYPE)
+	{
+		return Operand();
+	}	
+
+	Operand result = Operand();
+	result.type = BOOL_TYPE;
+	
+	result.value.boolValue = left.value.boolValue || right.value.boolValue;
+	
+	return result;
+}
+
+
+
 
 
 
@@ -439,6 +519,22 @@ Types Operand::Type_Check_Relop(Operand& left, Operand& right)
 
 	return UNKNOWN;
 }
+
+
+
+/* Checks to be sure that both opperands in a logic expression are of type boolean*/
+Types Operand::Type_Check_Logic(Operand& left, Operand& right)
+{
+	if(left.type == BOOL_TYPE && right.type == BOOL_TYPE)
+	{
+		return left.type;
+	}
+
+	return UNKNOWN;
+}
+
+
+
 
 
 /*Widens the supplied operand to a REAL_TYPE*/

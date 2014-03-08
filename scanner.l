@@ -15,20 +15,19 @@
 %option noyywrap yylineno
 
 %{
-#include "listing.h"
 #include "locals.h"
+#include "listing.h"
+#include "expression.h"
 #include "tokens.h"
+
 %}
 
 
 ws		[ \t\r]+
 line	[\n]
 punc	[,:;\(\)]
-relop	(<=|<|>=|>|\/=|=)
 comment (--)[ a-zA-Z0-9,\.<>\\|`~\-_+=!@#$%^&*();:''""\[\]]*
 ident	[A-Za-z](?:[a-zA-Z0-9]+)*
-addop	[-+]
-mulop	[*/]
 real	[0-9]+\.[0-9]*
 int		[0-9]+
 bool	(true|false)
@@ -55,12 +54,19 @@ not			{ECHO; return NOT;}
 {ws}		{ECHO;}
 {comment}	{ECHO;}
 {punc}		{ECHO; return yytext[0];}
-{relop}		{ECHO; return RELOP;}
-{bool}		{ECHO; yylval.types = BOOL_TYPE; return LITERAL;}
-{addop}		{ECHO; return ADDOP;}
-{mulop}		{ECHO; return MULOP;}
-{real}		{ECHO; yylval.types = REAL_TYPE; return LITERAL;}
-{int}		{ECHO; yylval.types = INT_TYPE; return LITERAL;}
+"<="		{ECHO; yylval.name = LTOE; return RELOP;}
+"<"			{ECHO; yylval.name = LT; return RELOP;}
+">="		{ECHO; yylval.name = GTOE; return RELOP;}
+">"			{ECHO; yylval.name = GT; return RELOP;}
+"\/="		{ECHO; yylval.name = NE; return RELOP;}
+"="			{ECHO; yylval.name = EE; return RELOP;}
+{bool}		{ECHO; yylval.operand = new Operand(yytext); return LITERAL;}
+"+"			{ECHO; yylval.name = ADD; return ADDOP;}
+"-"			{ECHO; yylval.name = SUB; return ADDOP;}
+"*"			{ECHO; yylval.name = MUL; return MULOP;}
+"/"			{ECHO; yylval.name = DIV; return MULOP;}
+{real}		{ECHO; yylval.operand = new Operand(yytext); return LITERAL;}
+{int}		{ECHO; yylval.operand = new Operand(yytext); return LITERAL;}
 {ident}		{ECHO; yylval.ident = (char*)malloc(yyleng + 1);
 			strcpy(yylval.ident, yytext); return IDENT;}
 

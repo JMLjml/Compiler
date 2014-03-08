@@ -44,7 +44,7 @@ class Locals
 {
 public:
 	void insert(char* identifier, Operand op);
-	Operand* lookUp(char* identifier);
+	Operand lookUp(char* identifier);
 	void clear();
 private:
 	map<string, Operand> symbols;

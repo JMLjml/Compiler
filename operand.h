@@ -14,6 +14,8 @@ public:
 
 	void print();
 
+	bool getBoolValue();
+
 
 	
 
@@ -23,20 +25,23 @@ public:
 
 	
 	//Arithmetic operations
-	friend Operand operator+(Operand& left, Operand& right);
-	friend Operand operator-(Operand& left, Operand& right);
-	friend Operand operator*(Operand& left, Operand& right);
-	friend Operand operator/(Operand& left, Operand& right);
+	friend Operand operator+(Operand left, Operand right);
+	friend Operand operator-(Operand left, Operand right);
+	friend Operand operator*(Operand left, Operand right);
+	friend Operand operator/(Operand left, Operand right);
 
 	//Relational operations
-	friend bool operator<(Operand& left, Operand& right);
-	friend bool operator<=(Operand& left, Operand& right);
-	friend bool operator>(Operand& left, Operand& right);
-	friend bool operator>=(Operand& left, Operand& right);
-	friend bool operator==(Operand& left, Operand& right);
-	friend bool operator!=(Operand& left, Operand& right);
-	friend bool operator!(Operand& left);
+	friend Operand operator<(Operand left, Operand right);
+	friend Operand operator<=(Operand left, Operand right);
+	friend Operand operator>(Operand left, Operand right);
+	friend Operand operator>=(Operand left, Operand right);
+	friend Operand operator==(Operand left, Operand right);
+	friend Operand operator!=(Operand left, Operand right);
+	friend Operand operator!(Operand left);
 
+	//Logic Operations
+	friend Operand operator&&(Operand left, Operand right);
+	friend Operand operator||(Operand left, Operand right);
 	
 
 private:
@@ -51,6 +56,7 @@ private:
 	void coerce();
 	static Types Type_Check_Arithmetic(Operand& left, Operand& right);
 	static Types Type_Check_Relop(Operand& left, Operand& right);
+	static Types Type_Check_Logic(Operand& left, Operand& right);
 };
 
 typedef Operand* OperandPtr;
