@@ -17,7 +17,7 @@ scanner.c: scanner.l
 	flex scanner.l
 	mv lex.yy.c scanner.c
 
-parser.o: parser.c locals.h listing.h operand.h
+parser.o: parser.c locals.h listing.h
 	g++ -c -Wall parser.c
 
 parser.c tokens.h: parser.y

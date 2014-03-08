@@ -9,9 +9,12 @@
 	locals.h supplies the symbol table for identifier tokens found by parser.y
 */
 
+/*
 #include <string>
 #include <map>
 using namespace std;
+
+
 
 enum Types {UNKNOWN, INT_TYPE, REAL_TYPE, BOOL_TYPE,};
 
@@ -23,4 +26,26 @@ public:
 	void clear();
 private:
 	map<string, Types> symbols;
+};
+
+*/
+
+
+#include <string>
+#include <map>
+#include "operand.h"
+using namespace std;
+
+
+
+
+
+class Locals
+{
+public:
+	void insert(char* identifier, Operand op);
+	Operand* lookUp(char* identifier);
+	void clear();
+private:
+	map<string, Operand> symbols;
 };

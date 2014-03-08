@@ -23,7 +23,7 @@
 #include "locals.h"
 
 
-#include "operand.h"
+//#include "operand.h"
 
 
 
@@ -33,7 +33,7 @@ extern FILE *yyin;
 extern int yylineno;
 extern char *yytext;
 
-
+int parmCount = 0;
 
 //functions for checking sematics
 Types Type_Check_Same_Return(Types left, Types right);
@@ -62,11 +62,14 @@ Locals* locals = new Locals();
 %union
 {
 	char* ident;
-	Types types;
+	Types types;// this will go away
+	OperandPtr operand;
+	//Operations operations
 }
 
 
 //Declare Tokens
+//need to add a type of name for the name of the operation(enum defined in expression class)
 %token RELOP
 %token ADDOP
 %token MULOP
@@ -83,27 +86,28 @@ Locals* locals = new Locals();
 %token OR
 %token NOT
 %token <ident> IDENT
-%token <types> INT
-%token <types> REAL
-%token <types> BOOLEAN
-%token <types> LITERAL
+%token <operand> INT
+%token <operand> REAL
+%token <operand> BOOLEAN
+%token <operand> LITERAL
 //INT, REAL, and BOOLEAN are for the reserved keywords
 
 
 //Declare types for non terminals
+//All of these will prolly be expr
 %type <types> function_recovery
 %type <types> function
 %type <types> type
-%type <types> body
-%type <types> variable
-%type <types> statement
-%type <types> expression
-%type <types> and
-%type <types> relation
-%type <types> sum
-%type <types> term
-%type <types> not
-%type <types> factor
+%type <operand> body
+%type <operand> variable
+%type <operand> statement
+%type <operand> expression
+%type <operand> and
+%type <operand> relation
+%type <operand> sum
+%type <operand> term
+%type <operand> not
+%type <operand> factor
 
 
 
@@ -112,22 +116,53 @@ program:
 	function;
 	
 function:
-	function_recovery body {Type_Check_Same_Return($1,$2);};
+	function_recovery body 
+	//{Type_Check_Same_Return($1,$2);};
+	//{Type_Check_Same_Return($1->getType(), $2->getType());}
 
 function_recovery:   
     function ';' |
     error ';' {$$ = UNKNOWN;};
 
+
+
+/****************************************
+
+This is all jacked up, just entereing a dummy operand for now, I think I need a special op for dealing with func name and return type 
+****************************************/
 function:
-	FUNCTION IDENT parameters RETURNS type {locals->insert($2,$5); $$ = $5;}
-	| FUNCTION IDENT RETURNS type {locals->insert($2,$4); $$ = $4;};
+	
+	FUNCTION IDENT parameters RETURNS type 
+	//{locals->insert($2,$5); $$ = $5;}
+	{locals->insert($2,Operand());}
+
+
+
+	| FUNCTION IDENT RETURNS type 
+	//{locals->insert($2,$4); $$ = $4;};
+	{locals->insert($2,Operand());}
+
+
 
 parameters:
 	parameter ',' parameter
 	| parameter;
 
+
+
+
+/****************************************
+
+This is all jacked up, just entereing a dummy operand for now, I think this is where we make the call to parm array. 
+****************************************/
 parameter:
-	IDENT ':' type {locals->insert($1,$3);};
+	IDENT ':' type 
+	//{locals->insert($1,$3); parmCount++;};
+	{locals->insert($1,Operand());}
+
+
+
+
 
 type:
 	INT {$$ = INT_TYPE;}
@@ -137,52 +172,104 @@ type:
 body:
 	variable BEGIN_ statement END ';' {$$ = $3;}
 	| BEGIN_ statement END ';' {$$ = $2;}
-	| error ';'{$$ = UNKNOWN;};
+	
+	| error ';'
+	//{$$ = UNKNOWN;};
+	{$$ = new Operand();}
+
+
+
+
+/****************************************
+
+This is all jacked up, just entereing a dummy operand for now, I think this is where we make the call to parm array. Nope. These are
+variables, not parameters...
+****************************************/
 
 variable:
-	variable IDENT ':' type IS statement {locals->insert($2,Type_Check_Assignment($4,$6));};
-	| IDENT ':' type IS statement {locals->insert($1,Type_Check_Assignment($3,$5));};
+	variable IDENT ':' type IS statement 
+
+	//{locals->insert($2,Type_Check_Assignment($4,$6));};
+	{locals->insert($2,Operand());}
+
+	| IDENT ':' type IS statement 
+
+
+	//{locals->insert($1,Type_Check_Assignment($3,$5));};
+	{locals->insert($1,Operand());}
+
+
+
+
+
 
 statement:
-	expression ';' 
-	| IF expression {Type_Check_If($2);} THEN statement ELSE statement ENDIF ';'
-	{Type_Check_Same_If($5, $7); $$ = $5;};
-	| error ';'{$$ = UNKNOWN;};
+	expression ';' {$$ = new Operand();}
+	
+	| IF expression {Type_Check_If($2->getType());} THEN statement ELSE statement ENDIF ';'
+	//{Type_Check_Same_If($5, $7); $$ = $5;};
+	{$$ = new Operand();}
+
+
+
+	| error ';'
+	//{$$ = UNKNOWN;};
+	{$$ = new Operand();}
+
 
 expression:
-	expression OR and {$$ = Type_Check_Logic($1, $3);}
+	expression OR and 
+	//{$$ = Type_Check_Logic($1, $3);}
+	{$$ = new Operand();}
+	
 	| and;
 
 
 and:
-	and AND relation {$$ = Type_Check_Logic($1, $3);}
+	and AND relation 
+	//{$$ = Type_Check_Logic($1, $3);}
+	{$$ = new Operand();}
 	| relation;
 
 
 
 relation:
-	relation RELOP sum {$$ = Type_Check_Relop($1, $3);}
+	relation RELOP sum 
+	//{$$ = Type_Check_Relop($1, $3);}
+	{$$ = new Operand();}
 	| sum;
 
 sum:
-	sum ADDOP term {$$ = Type_Check_Arithmetic($1, $3);}
+	sum ADDOP term 
+	//{$$ = Type_Check_Arithmetic($1, $3);}
+	{$$ = new Operand();}
+
 	| term;
 
 
 term:
-	term MULOP not {$$ = Type_Check_Arithmetic($1, $3);}
+	term MULOP not 
+	//{$$ = Type_Check_Arithmetic($1, $3);}
+	{$$ = new Operand();}
+
 	| not;
 
 not:	
-	NOT factor {$$ = Type_Check_Not($2);}
+	NOT factor 
+	//{$$ = Type_Check_Not($2);}
+	{$$ = new Operand();}
+
 	| factor;
 
 
 factor:
-	LITERAL
-	| IDENT {$$ = locals->lookUp($1);}
-	| '(' expression ')'{$$ = $2;};
+	LITERAL {$$ = new Operand();}
 
+	| IDENT {$$ = locals->lookUp($1);}
+
+	| '(' expression ')'
+	//{$$ = $2;};
+	{$$ = new Operand();}
 
 %%
 
@@ -195,7 +282,7 @@ int main(int argc, char **argv)
 	//Invalid arguments
 	if(argc < 2)
 	{
-		printf("Invalid input. Usage from command line $ ./compile < data.txt [arguments]\n");
+		printf("Invalid input. Usage from command line $ ./compile data.txt [arguments]\n");
 		return 1;
 	}
 
@@ -224,6 +311,39 @@ int main(int argc, char **argv)
 	}
 
 	
+
+
+
+
+	/* Testing out the operand operations here */
+
+/*
+	Operand op1 = Operand("false");
+	op1.print();
+
+	Operand op2 = Operand("100");
+	op2.print();
+
+	//Operand op3 = op1 / op2;
+
+	bool result = !op2;
+	op1.print();
+	op2.print();
+	//op3.print();
+
+	printf("the bool value is %d\n", result);
+
+//*/
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -349,7 +469,7 @@ Types Type_Check_Arithmetic(Types left, Types right)
 
 
 	Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC, 
-		"Type Mismatch. Attempting to use coercion during arithmetic opperation.");
+		"Type Mismatch. Attempting to use coercion with UNKNOWN type during arithmetic opperation.");
 
 	return UNKNOWN;
 }

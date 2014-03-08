@@ -17,14 +17,14 @@ using namespace std;
 #include "locals.h"
 #include "listing.h"
 
-void Locals::insert(char* identifier, Types type)
+void Locals::insert(char* identifier, Operand op)
 {
 	string name(identifier);
 
 	// Check for Duplicate Name
 	if(symbols.find(name) == symbols.end())
 	{
-		symbols[name] = type;
+		symbols[name] = op;
 	
 	} else {
 		Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC,
@@ -34,10 +34,10 @@ void Locals::insert(char* identifier, Types type)
 }
 
 
-Types Locals::lookUp(char* identifier)
+Operand* Locals::lookUp(char* identifier)
 {
 	string name(identifier);
-	map<string, Types>::iterator iterator;
+	map<string, Operand>::iterator iterator;
 	iterator = symbols.find(name);
 	
 	// Check for Undeclared  
@@ -46,10 +46,10 @@ Types Locals::lookUp(char* identifier)
 		Listing::GetInstance()->appendError(Listing::GetInstance()->SEMANTIC,
 		 "Attempting to access an undeclared identifier");
 
-		return UNKNOWN;
+		return new Operand();
 	}
 
-	return iterator->second;
+	return &iterator->second;
 }
 
 /* Called by the parser after completing a file so that the 
