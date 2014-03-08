@@ -1,7 +1,7 @@
 /*  Course: 1402CMSC4306380
-	Project 3
+	Project 4
 	Author John M. Lasheski
-	Date: Feb 21, 2014
+	Date: March 7, 2014
 	Platform: Flex, Cygwin64, Sublime Text 2
 	
 	locals.h is part of a compiler project that compiles a simple functional language.

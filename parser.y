@@ -1,7 +1,7 @@
 /*  Course: 1402CMSC4306380
-	Project 3
+	Project 4
 	Author John M. Lasheski
-	Date: Feb 21, 2014
+	Date: March 7, 2014
 	Platform: Flex, Cygwin64, Sublime Text 2
 	
 	parser.y is part of a compiler project that compiles a simple functional language.
@@ -21,6 +21,12 @@
 #include <stdio.h>
 #include "listing.h"
 #include "locals.h"
+
+
+#include "operand.h"
+
+
+
 
 extern int yylex(void);
 extern FILE *yyin;
@@ -52,7 +58,7 @@ Locals* locals = new Locals();
 
 %error-verbose
 
-//Unionfor holding types
+//Union for holding types
 %union
 {
 	char* ident;
@@ -183,57 +189,84 @@ factor:
 
 int main(int argc, char **argv)
 {
+	
+
+
 	//Invalid arguments
 	if(argc < 2)
 	{
-		printf("Invalid input. Usage from command line $ ./compile data.txt\n");
+		printf("Invalid input. Usage from command line $ ./compile < data.txt [arguments]\n");
 		return 1;
 	}
 
+	
+	//for storring option parameters
+	Operand *parms[argc - 2];
 
-	//For each file supplied, open and parse
-	for(int i = 1; i < argc; i++)
+	
+
+	//There are parameters that need to be read in
+	if(argc > 2)
 	{
-		FILE *f = fopen(argv[i], "r");
-
-		//Invalid data file, exit scanning
-		if(!f)
+		//store the optional arguments
+		for(int i = 2; i < argc; i++)
 		{
-			perror(argv[i]);
-			return(1);
+			parms[i-2] = new Operand(argv[i]);
 		}
+	}
 
-		//Set yyin to the file to be parsed
-		yyin = f;
+	
 
-		// set the line number to 1 each time we begin parsing a new file
-		yylineno = 1;
+	//print the args for testing only
+	for(int i = 0; i < argc - 2; i++)
+	{
+		parms[i]->print();
+	}
 
-		//See if the input file actually has data to process, if so print the first line #
-		char c = fgetc(f);
-		if(c != EOF)
-		{
-			printf("%4d ", yylineno);
-		}
+	
 
-		ungetc(c,f);//put the first char back to the file stream
+
+
+
+	FILE *f = fopen(argv[1], "r");
+
+	//Invalid data file, exit scanning
+	if(!f)
+	{
+		perror(argv[1]);
+		return(1);
+	}
+
+	//Set yyin to the file to be parsed
+	yyin = f;
+
+	// set the line number to 1 each time we begin parsing a new file
+	yylineno = 1;
+
+	//See if the input file actually has data to process, if so print the first line #
+	char c = fgetc(f);
+	if(c != EOF)
+	{
+		printf("%4d ", yylineno);
+	}
+
+	ungetc(c,f);//put the first char back to the file stream
 		
-		//parse the file
-		yyparse();
+	//parse the file
+	yyparse();
 
-		//close the input file
-		fclose(f);
+	//close the input file
+	fclose(f);
 
-		//print the error summary at the end of parsing
-		Listing::GetInstance()->printSummary();
+	//print the error summary at the end of parsing
+	Listing::GetInstance()->printSummary();
 
-		//destroy the Listing so we start with a clean slate for the next file
-		Listing::GetInstance()->~Listing();
+	//destroy the Listing so we start with a clean slate for the next file
+	Listing::GetInstance()->~Listing();
 
-		//Clear out the symbol table so we start with a clean slate for the next file
-		locals->clear();
-	}	
-
+	//Clear out the symbol table so we start with a clean slate for the next file
+	locals->clear();
+	
 	return 0;
 }
 
