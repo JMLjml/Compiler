@@ -1,11 +1,20 @@
+/*  Course: 1402CMSC4306380
+	Project 4
+	Author John M. Lasheski
+	Date: March 7, 2014
+	Platform: Flex, Cygwin64, Sublime Text 2
+	
+	operand.h is part of a compiler project that compiles a simple functional language.
+
+	operand.h defines teh header file for the OPerand class. An Operand object is the base object used in construction
+	of an expression tree. The Operand class serves as the leaf nodes for the tree.
+*/
+
 #include <cstring>
 #include <cstdlib>
-//#include <iostream>
 #include <string>
 #include <algorithm>
-
 #include <stdio.h>
-
 
 using namespace std;
 
@@ -64,18 +73,40 @@ Operand::Operand(char* op)
 }
 
 
+/* Constructors for specifying Operand Type only. Value is a dummy value*/
+Operand::Operand(int value)
+{
+	type = INT_TYPE;
+	this->value.intValue = value;
+}
 
+Operand::Operand(double value)
+{
+	type = REAL_TYPE;
+	this->value.realValue = value;
+}
+
+Operand::Operand(bool value)
+{
+	type = BOOL_TYPE;
+	this->value.boolValue = value;
+}
+
+
+/*Returns the type of the current Operand*/
 Types Operand::getType()
 {
 	return type;
 }
 
+/*Useful for error checking during expression evaluation*/
 bool Operand::getBoolValue()
 {
 	return value.boolValue;
 }
 
 
+/*Print the type and data of an Operand. Called by the parser after the expression tree has been evaluated.*/
 void Operand::print()
 {
 	switch(type)
@@ -105,7 +136,6 @@ void Operand::print()
 *				ARITHMETIC OPERATIONS
 *
 *****************************************************************************************/
-
 
 Operand operator+(Operand left, Operand right)
 {
@@ -162,6 +192,7 @@ Operand operator-(Operand left, Operand right)
 
 	return result;
 }
+
 
 
 Operand operator*(Operand left, Operand right)
@@ -224,15 +255,11 @@ Operand operator/(Operand left, Operand right)
 
 
 
-
-
 /*****************************************************************************************
 *
 *				RELATIONAL OPERATIONS
 *
 *****************************************************************************************/
-
-
 
 Operand operator<(Operand left, Operand right)
 {
@@ -312,6 +339,7 @@ Operand operator>(Operand left, Operand right)
 
 	return result;
 }
+
 
 
 Operand operator>=(Operand left, Operand right)
@@ -394,6 +422,11 @@ Operand operator!=(Operand left, Operand right)
 }
 
 
+/*****************************************************************************************
+*
+*				LOGICAL OPERATIONS
+*
+*****************************************************************************************/
 
 Operand operator!(Operand left)
 {
@@ -433,6 +466,7 @@ Operand operator&&(Operand left, Operand right)
 }
 
 
+
 Operand operator||(Operand left, Operand right)
 {
 	Types type = Operand::Type_Check_Logic(left,right);
@@ -461,7 +495,6 @@ Operand operator||(Operand left, Operand right)
 *				TYPE CHECKING FUNCTIONS
 *
 *****************************************************************************************/
-
 
 
 /* Checks to make sure that both opperands in an arithmetic expression
@@ -535,9 +568,7 @@ Types Operand::Type_Check_Logic(Operand& left, Operand& right)
 
 
 
-
-
-/*Widens the supplied operand to a REAL_TYPE*/
+/*Helper method that widens the supplied operand to a REAL_TYPE*/
 void Operand::coerce()
 {
 	type = REAL_TYPE;

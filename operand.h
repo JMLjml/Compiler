@@ -1,4 +1,14 @@
+/*  Course: 1402CMSC4306380
+	Project 4
+	Author John M. Lasheski
+	Date: March 7, 2014
+	Platform: Flex, Cygwin64, Sublime Text 2
+	
+	operand.h is part of a compiler project that compiles a simple functional language.
 
+	operand.h defines teh header file for the OPerand class. An Operand object is the base object used in construction
+	of an expression tree. The Operand class serves as the leaf nodes for the tree.
+*/
 
 enum Types {UNKNOWN, INT_TYPE, REAL_TYPE, BOOL_TYPE,};
 
@@ -8,22 +18,14 @@ class Operand
 public:
 	Operand();
 	Operand(char* op);
-
+	Operand(int value);
+	Operand(double value);
+	Operand(bool value);
 
 	Types getType();
-
 	void print();
-
 	bool getBoolValue();
-
-
-	
-
-	//I think we need an evalutae function for operand to return it's value. Nope.
-	// The exrepssion calss should include a class called literal for storing and returning
-	//the values. The operations need to be defined here though.
-
-	
+		
 	//Arithmetic operations
 	friend Operand operator+(Operand left, Operand right);
 	friend Operand operator-(Operand left, Operand right);
@@ -43,7 +45,6 @@ public:
 	friend Operand operator&&(Operand left, Operand right);
 	friend Operand operator||(Operand left, Operand right);
 	
-
 private:
 	Types type;
 	union Value

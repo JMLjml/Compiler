@@ -1,5 +1,14 @@
-//#include "operand.h"
-//#include "locals.h"
+/*  Course: 1402CMSC4306380
+	Project 4
+	Author John M. Lasheski
+	Date: March 7, 2014
+	Platform: Flex, Cygwin64, Sublime Text 2
+	
+	expression.h is part of a compiler project that compiles a simple functional language.
+
+	expression.h is used to construct expression tress. After the tree has been constructed the evalutate()
+	method can be called which returns the Operand result of the expression tree that has been built.
+*/
 
 enum Operators {ADD, SUB, MUL, DIV, LT, LTOE, GT, GTOE, EE, NE};
 
@@ -103,17 +112,6 @@ public:
 		return left->evaluate() / right->evaluate();
 	}
 };
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*****************************************************************************************
@@ -228,9 +226,6 @@ public:
 		return left->evaluate() || right->evaluate();
     }
 };
-
-
-
 
 
 

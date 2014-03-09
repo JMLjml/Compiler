@@ -4,7 +4,7 @@
 #	Date: March 7, 2014
 #	Platform: Flex, Cygwin64, Sublime Text 2
 
-#	makefile for Project 3. Uses flex and g++ compilers.
+#	makefile for Project 4. Uses flex and g++ compilers.
 
 compile: scanner.o parser.o listing.o locals.o operand.o
 	g++ -Wall scanner.o parser.o listing.o locals.o operand.o -o compile 

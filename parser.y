@@ -26,8 +26,6 @@
 
 
 
-
-
 extern int yylex(void);
 extern FILE *yyin;
 extern int yylineno;
@@ -57,9 +55,6 @@ Locals* locals = new Locals();
 //Expression pointer to hold the expresson until evaluation
 ExprPtr expression;
 
-//value used for storing outcome of expression evaluated in an if statement
-bool condition = false;
-
 //Vector for storing the parms of the function if any
 vector<Operand> parms;
 
@@ -74,7 +69,6 @@ int parmCount = 0;
 %union
 {
 	char* ident;
-	Types types;// this will go away
 	OperandPtr operand;
 	Operators name;
 	ExprPtr expr;
@@ -106,10 +100,9 @@ int parmCount = 0;
 
 
 //Declare types for non terminals
-//All of these will prolly be expr
 %type <expr> function_recovery
 %type <expr> function
-%type <types> type
+%type <expr> type
 %type <expr> body
 %type <expr> variable
 %type <expr> statement
@@ -129,9 +122,10 @@ program:
 	
 function:
 	function_recovery body 
-	//{Type_Check_Same_Return($1,$2);};
-	//{Type_Check_Same_Return($1->getType(), $2->getType());}
-	{$$ = $2;}
+		{
+			Type_Check_Same_Return($1->evaluate().getType(), $2->evaluate().getType());
+			$$ = $2;
+		}
 
 function_recovery:   
     function ';' {$$ = $1;}
@@ -139,21 +133,42 @@ function_recovery:
 
 
 
-/****************************************
-
-This is all jacked up, just entereing a dummy operand for now, I think I need a special op for dealing with func name and return type 
-****************************************/
 function:
 	
 	FUNCTION IDENT parameters RETURNS type 
-	//{locals->insert($2,$5); $$ = $5;}
-	{locals->insert($2,Operand());}
-
-
-
+		{
+			Types type = $5->evaluate().getType();
+			if(type == INT_TYPE)
+			{
+				locals->insert($2,Operand(0));
+			}
+			else if(type == REAL_TYPE)
+			{
+				locals->insert($2,Operand(0.0));
+			}
+			else
+			{
+				locals->insert($2,Operand(false));
+			}
+			$$ = $5;
+		}
 	| FUNCTION IDENT RETURNS type 
-	//{locals->insert($2,$4); $$ = $4;};
-	{locals->insert($2,Operand());}
+		{
+			Types type = $4->evaluate().getType();
+			if(type == INT_TYPE)
+			{
+				locals->insert($2,Operand(0));
+			}
+			else if(type == REAL_TYPE)
+			{
+				locals->insert($2,Operand(0.0));
+			}
+			else
+			{
+				locals->insert($2,Operand(false));
+			}
+			$$ = $4;
+		};
 
 
 
@@ -167,64 +182,45 @@ parameter:
 	{
 		locals->insert($1,parms[parmCount]);
 		parmCount++;
-	}
+	};
 
 
-
-/*********************************
-	Type needs to be dealt with
-*****************************/
 
 type:
-	INT {$$ = INT_TYPE;}
-	| REAL {$$ = REAL_TYPE;}
-	| BOOLEAN {$$ = BOOL_TYPE;};
+	INT {$$ = new Literal(Operand(0));}
+	| REAL {$$ = new Literal(Operand(0.0));}
+	| BOOLEAN {$$ = new Literal(Operand(false));};
+
+
 
 body:
 	variable BEGIN_ statement END ';' {$$ = $3;}
-	| BEGIN_ statement END ';' {$$ = $2;}
-	
+	| BEGIN_ statement END ';' {$$ = $2;}	
 	| error ';'{$$ = new Literal(Operand());};
 
 
 
-
-/****************************************
-
-Stil need to fix the type terminal so that the evaulte expression woek for type checking
-****************************************/
-
 variable:
 	variable IDENT ':' type IS statement 
 		{
-			//Type_Check_Assignment($4->evaluate().getType(),$6->evaluate().getType());
+			Type_Check_Assignment($4->evaluate().getType(),$6->evaluate().getType());
 			locals->insert($2, $6->evaluate());
 		}
 	| IDENT ':' type IS statement 
 		{
-			//Type_Check_Assignment($3->evaluate().getType(),$5->evaluate().getType());
-			ExprPtr ptr = $5;
-			Operand result = ptr->evaluate();
-			locals->insert($1, result);
+			Type_Check_Assignment($3->evaluate().getType(),$5->evaluate().getType());
+			locals->insert($1, $5->evaluate());
 		};
 
 
 
-
 statement:
-	expression ';' {$$ = $1;}
-	
-	| IF expression 
-		{	
-			Type_Check_If($2->evaluate().getType());
-			ExprPtr ptr = $2;
-			Operand result = ptr->evaluate();
-			condition = result.getBoolValue();
-		} 
+	expression ';' {$$ = $1;}	
+	| IF expression {Type_Check_If($2->evaluate().getType());} 
 	THEN statement ELSE statement ENDIF ';'
 		{	
 			Type_Check_Same_If($5->evaluate().getType(),$7->evaluate().getType());
-			if(condition)
+			if($2->evaluate().getBoolValue())
 			{
 				$$ = $5;
 			}
@@ -233,7 +229,6 @@ statement:
 				$$ = $7;
 			}
 		}
-
 	| error ';'	{$$ = new Literal(Operand());};
 
 
@@ -387,7 +382,6 @@ int main(int argc, char **argv)
 *				TYPE CHECKING FUNCTIONS
 *
 *****************************************************************************************/
-
 
 
 /* A relational opperation should compare two Ints or two Reals. Booleans are not
